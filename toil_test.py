@@ -2,6 +2,7 @@ from toil.job import Job
 import os
 import argparse
 import tempfile
+from toil.common import setupToil
 
 def writeJob(job):
     #tmpFile = tempfile.mkstemp(dir=job.fileStore.getLocalTempDir())
@@ -15,7 +16,9 @@ def main():
     parser = argparse.ArgumentParser()
     Job.Runner.addToilOptions(parser)
     args = parser.parse_args()
-    Job.Runner.startToil(Job.wrapJobFn(writeJob), args)
+    rootJob = Job.wrapJobFn(writeJob)
+    with setupToil(args) as (config, batchSystem, jobStore):
+	Job.Runner.start(rootJob, args, config, batchSystem, jobStore)
 
 if __name__ == "__main__":
     main()
